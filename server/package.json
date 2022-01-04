@@ -1,0 +1,28 @@
+{
+  "name": "demo-chat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TroyanOlga/chat.git"
+  },
+  "author": "Troyan Olga",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TroyanOlga/chat/issues"
+  },
+  "homepage": "https://github.com/TroyanOlga/chat#readme",
+  "devDependencies": {
+    "eslint": "^8.6.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4"
+  },
+  "dependencies": {
+    "ioredis": "^4.28.2"
+  }
+}
