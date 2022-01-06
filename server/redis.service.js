@@ -2,11 +2,11 @@ import Redis from 'ioredis';
 
 const redis = new Redis(); // uses defaults unless given configuration object
 export default {
-  async getMessages() {
-    await redis.get('foo');
+  async getMessages(roomId) {
+    return redis.zrevrange(`room:${roomId}`, 0, 50);
   },
-  async saveMessage() {
-    await redis.set('foo', 'bar');
+  async saveMessage(roomId, data) {
+    await redis.zadd(`room:${roomId}`, data.dateTime, JSON.stringify(data));
   },
   async getRooms() {
     return redis.smembers('rooms');

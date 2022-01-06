@@ -35,7 +35,6 @@
 </template>
 
 <script>
-
 export default {
   name: 'Login',
   data: function () {
@@ -47,10 +46,10 @@ export default {
   methods: {
     onSubmit: async function () {
       try {
-        await this.axios.post('/login', { name: this.name });
-        this.$router.push({ path: '/rooms' });
+        const result = await this.axios.post('/login', { name: this.name });
+        console.log(result);
+        this.$router.push({ name: 'Chat', params: { userId: result.data.userId } });
       } catch (err) {
-        console.log(err);
         this.showErrorTime = 5;
       }
     },
