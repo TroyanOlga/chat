@@ -1,13 +1,16 @@
 <template>
-  <div id="app">
-    <router-view />
-  </div>
+  <Login />
 </template>
 
 <script>
+// @ is an alias to /src
+import Login from '@/components/Login.vue';
 
 export default {
-  name: 'App',
+  name: 'Home',
+  components: {
+    Login,
+  },
 };
 </script>
 

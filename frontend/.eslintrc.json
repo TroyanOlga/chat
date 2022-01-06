@@ -5,12 +5,14 @@
     },
     "extends": [
         "plugin:vue/essential",
-        "airbnb-base"
+        "airbnb-base",
+        "plugin:vue/recommended"
     ],
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
+    "parser": "vue-eslint-parser",
     "parserOptions": {
         "ecmaVersion": 2018,
         "sourceType": "module"
@@ -21,6 +23,25 @@
     "rules": {
         "vue/multi-word-component-names": "off",
         "func-names": "off",
-        "object-shorthand": "off"
+        "object-shorthand": "off",
+        "vue/max-attributes-per-line": ["error", {
+            "singleline": {
+              "max": 2
+            },      
+            "multiline": {
+              "max": 1
+            }
+          }],
+        "global-require": "off"
+    },
+    "settings": { 
+        "import/resolver": {
+            "alias": {
+              "map": [
+                ["@", "./src"]
+              ],
+              "extensions": [".js", ".vue"]
+            }
+          }
     }
 }

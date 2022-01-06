@@ -31,30 +31,26 @@ http.createServer((req, res) => {
         let temporaryBody = '';
         req.on('data', (chunk) => {
           temporaryBody += chunk;
-          console.log('AAAAA');
         });
 
-        let body = '';
-        req.on('end', () => {
-          body = JSON.parse(temporaryBody);
-          console.log(body);
-          console.log('OUT', body);
-          const user = redisService.addUser(body.name)
-            .then((result) => result)
-            .catch((err) => {
-              res.writeHead(err.code, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ message: err.message }));
-            });
-          res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
-          res.write(JSON.stringify(user));
-          res.end();
+        req.on('end', async () => {
+          const body = JSON.parse(temporaryBody);
+          if (!body?.name) {
+            res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.write(JSON.stringify({ message: 'Name is missing!' }));
+            res.end();
+            return;
+          }
+          try {
+            const user = await redisService.addUser(body.name);
+            res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.write(JSON.stringify(user));
+            res.end();
+          } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.end(err.message);
+          }
         });
-
-        // if (!body?.name) {
-        //   res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
-        //   res.write({ message: 'Name is missing!' });
-        //   res.end();
-        // }
       }
       break;
     default:
