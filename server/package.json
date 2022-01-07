@@ -23,6 +23,7 @@
     "eslint-plugin-import": "^2.25.4"
   },
   "dependencies": {
-    "ioredis": "^4.28.2"
+    "ioredis": "^4.28.2",
+    "ws": "^8.4.0"
   }
 }

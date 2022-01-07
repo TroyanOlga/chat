@@ -6,6 +6,8 @@ export default {
     return redis.zrevrange(`room:${roomId}`, 0, 50);
   },
   async saveMessage(roomId, data) {
+    const username = await this.getUser(data.from);
+    data.username = username; // eslint-disable-line no-param-reassign
     await redis.zadd(`room:${roomId}`, data.dateTime, JSON.stringify(data));
   },
   async getRooms() {
@@ -37,5 +39,8 @@ export default {
     await this.addUserToRoom(userId, defaultRoom);
     const userRooms = await this.getAllRoomsForUser(userId);
     return { username, userId, rooms: userRooms };
+  },
+  async getUser(userId) {
+    return redis.hget(`user:${userId}`, 'username');
   },
 };

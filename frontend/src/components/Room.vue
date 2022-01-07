@@ -1,8 +1,13 @@
 <template>
   <div>
     {{ roomId }}
-    <div v-for="message in messages" :key="message.id">
-      {{ message }}
+    <div v-for="messageData in messages" :key="messageData.dateTime">
+      <div class="d-flex align-items-center">
+        <small>{{ messageData.username }}:</small>
+        <p class="mb-0">
+          {{ messageData.message }}
+        </p>
+      </div>
     </div>
     <b-alert
       v-model="showErrorTime"
@@ -21,7 +26,7 @@
         placeholder="Enter message here..."
         rows="3"
         max-rows="6"
-        @keyup.enter="onSubmit"
+        @keydown="inputHandler"
       />
     </b-form>
   </div>
@@ -49,9 +54,32 @@ export default {
     };
   },
   mounted: async function () {
-    this.messages = (await this.axios.get(`/room/${this.roomId}`)).data;
+    const messages = (await this.axios.get(`/room/${this.roomId}`)).data;
+    this.messages = messages.reverse();
+    const connection = new WebSocket('ws://localhost:3000');
+    connection.onmessage = (event) => {
+      try {
+        const response = JSON.parse(event.data);
+        if (response.username) {
+          this.messages.push(JSON.parse(event.data));
+        }
+      } catch (err) {
+        // do nothing
+      }
+    };
+
+    connection.onopen = (event) => {
+      console.log(event);
+      console.log('Successfully connected to the echo websocket server...');
+    };
   },
   methods: {
+    inputHandler(e) {
+      if (e.keyCode === 13 && !e.shiftKey) {
+        e.preventDefault();
+        this.onSubmit();
+      }
+    },
     onSubmit: async function () {
       try {
         await this.axios.post(`/room/${this.roomId}`, {
@@ -59,12 +87,21 @@ export default {
           dateTime: new Date().getTime(),
           message: this.currentMessage,
         });
+        this.currentMessage = '';
       } catch (err) {
         this.showErrorTime = 5;
       }
     },
     countDownChanged: function (dismissCountDown) {
       this.showErrorTime = dismissCountDown;
+    },
+    isJsonString: (str) => {
+      try {
+        JSON.parse(str);
+      } catch (e) {
+        return false;
+      }
+      return true;
     },
   },
 };

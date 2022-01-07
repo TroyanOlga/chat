@@ -47,7 +47,6 @@ export default {
     onSubmit: async function () {
       try {
         const result = await this.axios.post('/login', { name: this.name });
-        console.log(result);
         this.$router.push({ name: 'Chat', params: { userId: result.data.userId } });
       } catch (err) {
         this.showErrorTime = 5;
