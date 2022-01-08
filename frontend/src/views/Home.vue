@@ -1,5 +1,7 @@
 <template>
-  <Login />
+  <div class="h-100 d-flex align-items-center">
+    <Login />
+  </div>
 </template>
 
 <script>

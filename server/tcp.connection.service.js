@@ -1,4 +1,5 @@
 import net from 'net';
+import dayjs from 'dayjs';
 import redisService from './redis.service.js';
 import event from './event.service.js';
 
@@ -17,8 +18,8 @@ export default function initTcpServer() {
       message.push(data);
 
       // Proceed only if the 'enter' key has been pressed
-      if (data.endsWith('\n')) {
-        const clientInput = message.join('').replace('\r\n', '');
+      if (data.endsWith('\n') || data.endsWith('\r\n')) {
+        const clientInput = message.join('').replace('\r\n', '').replace('\n', '');
         if (!currentUser) {
           const user = await redisService.addUser(clientInput);
           currentUser = user.userId;
@@ -28,7 +29,7 @@ export default function initTcpServer() {
             .reverse();
           connection.write(`Welcome to general room, ${clientInput}`);
           olderRoomMessages.forEach((messageData) => {
-            connection.write(`${messageData.username} on ${new Date(messageData.dateTime)}: ${messageData.message}\n`);
+            connection.write(`${messageData.username} on ${dayjs(messageData.dateTime).format('YYYY-MM-DD HH:mm')}: ${messageData.message}\n`);
           });
         } else {
           // TODO refactor for additional rooms
@@ -45,7 +46,7 @@ export default function initTcpServer() {
     });
     event.on('newMessage', ((messageData) => {
       messageData = JSON.parse(messageData); // eslint-disable-line no-param-reassign
-      const date = new Date(messageData.dateTime);
+      const date = dayjs(messageData.dateTime).format('YYYY-MM-DD HH:mm');
       connection.write(`${messageData.username} on ${date}: ${messageData.message}\n`);
     }));
   });

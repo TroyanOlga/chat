@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <b-container>
+    <h1>Chat app</h1>
     <b-alert
       v-model="showErrorTime"
       variant="danger"
@@ -14,8 +15,6 @@
     >
       <b-form-group
         id="input-group-1"
-        label="Your Name:"
-        label-for="input-1"
       >
         <b-form-input
           id="input-1"
@@ -24,14 +23,22 @@
           required
         />
       </b-form-group>
-      <b-button type="reset" variant="danger">
+      <b-button
+        type="reset"
+        size="sm"
+        variant="outline-secondary"
+      >
         Reset
       </b-button>
-      <b-button type="submit" variant="primary">
+      <b-button
+        type="submit"
+        size="sm"
+        variant="outline-dark"
+      >
         Submit
       </b-button>
     </b-form>
-  </div>
+  </b-container>
 </template>
 
 <script>

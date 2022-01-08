@@ -1,13 +1,13 @@
 <template>
-  <div>
-    {{ roomId }}
+  <b-container>
     <div v-for="messageData in messages" :key="messageData.dateTime">
-      <div class="d-flex align-items-center">
-        <small>{{ messageData.username }}:</small>
-        <p class="mb-0">
-          {{ messageData.message }}
-        </p>
+      <div class="d-flex align-items-center justify-content-between">
+        <small class="fw-bold">{{ messageData.username }}</small>
+        <small class="text-muted">{{ $dayjs(messageData.dateTime).fromNow() }}</small>
       </div>
+      <p class="mb-0 border-bottom text-start">
+        {{ messageData.message }}
+      </p>
     </div>
     <b-alert
       v-model="showErrorTime"
@@ -29,7 +29,7 @@
         @keydown="inputHandler"
       />
     </b-form>
-  </div>
+  </b-container>
 </template>
 
 <script>
