@@ -1,5 +1,5 @@
 import { WebSocketServer } from 'ws';
-import router from './routing.service.js';
+import event from './event.service.js';
 
 export default function initWebsocket(server) {
   const wss = new WebSocketServer({ server });
@@ -9,8 +9,7 @@ export default function initWebsocket(server) {
     });
 
     ws.send('Connection established');
-    router.event.on('message', ((message) => {
-      console.log('HERE');
+    event.on('newMessage', ((message) => {
       ws.send(message);
     }));
   });
