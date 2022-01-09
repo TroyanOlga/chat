@@ -1,9 +1,10 @@
 <template>
-  <b-container>
+  <b-container class="h-100 d-flex flex-column">
     <b-button
       type="button"
       size="sm"
       variant="outline-secondary"
+      class="align-self-end my-3"
       @click="handleLogout"
     >
       Logout
@@ -26,6 +27,7 @@
       An error occured, please try later
     </b-alert>
     <b-form
+      class="mt-auto mb-3"
       @submit.prevent="onSubmit"
     >
       <b-form-textarea

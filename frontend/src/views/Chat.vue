@@ -1,6 +1,10 @@
 <template>
-  <div>
-    <div v-for="room in rooms" :key="room.id">
+  <div class="h-100">
+    <div
+      v-for="room in rooms"
+      :key="room.id"
+      class="h-100"
+    >
       <Room :room-id="room.id" :user="user" />
     </div>
   </div>
