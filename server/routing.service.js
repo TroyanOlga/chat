@@ -1,46 +1,52 @@
 import redisService from './redis.service.js';
 import event from './event.service.js';
 
+const standardHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': 'http://localhost:8080',
+};
+
 export default function routing(req, res) {
-  switch (true) {
-    case req.url === '/chat':
-      if (req.method === 'GET') {
+  switch (req.method) {
+    case 'OPTIONS':
+      // eslint-disable-next-line no-case-declarations
+      const headers = {
+        ...standardHeaders,
+        'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
+        'Access-Control-Allow-Headers': '*',
+      };
+      res.writeHead(204, headers);
+      res.end();
+      break;
+    case 'GET':
+      if (req.url === '/chat') {
         redisService.getRooms()
           .then((rooms) => {
-            res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.writeHead(200, standardHeaders);
             res.end(JSON.stringify(rooms));
           })
           .catch((err) => {
-            res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            console.error(err); // eslint-disable-line no-console
+            res.writeHead(500, standardHeaders);
             res.end(err.message);
           });
-      }
-      break;
-    case /\/room\/[0-9]*/.test(req.url):
-      if (req.method === 'GET') {
+      } else if (/\/room\/[0-9]*/.test(req.url)) {
         const roomId = req.url.split('/').pop();
         redisService.getMessages(roomId)
           .then((data) => {
             const messages = data.map((string) => JSON.parse(string));
-            res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.writeHead(200, standardHeaders);
             res.end(JSON.stringify(messages));
           })
           .catch((err) => {
-            res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            console.error(err); // eslint-disable-line no-console
+            res.writeHead(500, standardHeaders);
             res.end(err.message);
           });
       }
-      if (req.method === 'OPTIONS') {
-        const headers = {
-          'Access-Control-Allow-Origin': 'http://localhost:8080',
-          'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
-          'Access-Control-Allow-Headers': '*',
-        };
-        res.writeHead(204, headers);
-        res.end();
-        return;
-      }
-      if (req.method === 'POST') {
+      break;
+    case 'POST':
+      if (/\/room\/[0-9]*/.test(req.url)) {
         let temporaryBody = '';
         req.on('data', (chunk) => {
           temporaryBody += chunk;
@@ -49,7 +55,7 @@ export default function routing(req, res) {
         req.on('end', async () => {
           const body = JSON.parse(temporaryBody);
           if (!body?.message) {
-            res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.writeHead(400, standardHeaders);
             res.write(JSON.stringify({ message: 'No data received!' }));
             res.end();
             return;
@@ -58,29 +64,16 @@ export default function routing(req, res) {
             const roomId = req.url.split('/').pop();
             await redisService.saveMessage(roomId, body);
             event.emit('newMessage', JSON.stringify(body));
-            res.writeHead(201, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.writeHead(201, standardHeaders);
             res.end();
           } catch (err) {
-            console.error(err);
-            res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            console.error(err); // eslint-disable-line no-console
+            res.writeHead(500, standardHeaders);
             res.end(err.message);
           }
         });
-      }
-      break;
-    // TODO add proper authentication
-    case req.url === '/login':
-      if (req.method === 'OPTIONS') {
-        const headers = {
-          'Access-Control-Allow-Origin': 'http://localhost:8080',
-          'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
-          'Access-Control-Allow-Headers': '*',
-        };
-        res.writeHead(204, headers);
-        res.end();
-        return;
-      }
-      if (req.method === 'POST') {
+        // TODO add proper auth
+      } else if (req.url === '/login') {
         let temporaryBody = '';
         req.on('data', (chunk) => {
           temporaryBody += chunk;
@@ -89,37 +82,23 @@ export default function routing(req, res) {
         req.on('end', async () => {
           const body = JSON.parse(temporaryBody);
           if (!body?.name) {
-            res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.writeHead(400, standardHeaders);
             res.write(JSON.stringify({ message: 'Name is missing!' }));
             res.end();
             return;
           }
           try {
             const user = await redisService.addUser(body.name);
-            res.writeHead(201, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.writeHead(201, standardHeaders);
             res.write(JSON.stringify(user));
             res.end();
           } catch (err) {
-            res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            console.error(err); // eslint-disable-line no-console
+            res.writeHead(500, standardHeaders);
             res.end(err.message);
           }
         });
-      }
-      break;
-    // TODO update when proper authentication in place
-    // and potentially move usernames to temporary reserved list when user is deleted
-    case req.url === '/logout':
-      if (req.method === 'OPTIONS') {
-        const headers = {
-          'Access-Control-Allow-Origin': 'http://localhost:8080',
-          'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
-          'Access-Control-Allow-Headers': '*',
-        };
-        res.writeHead(204, headers);
-        res.end();
-        return;
-      }
-      if (req.method === 'POST') {
+      } else if (req.url === '/logout') {
         let temporaryBody = '';
         req.on('data', (chunk) => {
           temporaryBody += chunk;
@@ -128,7 +107,7 @@ export default function routing(req, res) {
         req.on('end', async () => {
           const body = JSON.parse(temporaryBody);
           if (!body?.user) {
-            res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.writeHead(400, standardHeaders);
             res.write(JSON.stringify({ message: 'User id is missing!' }));
             res.end();
             return;
@@ -136,10 +115,11 @@ export default function routing(req, res) {
           try {
             const user = await redisService.getUser(body.user);
             await redisService.markUsernameNotTaken(user);
-            res.writeHead(204, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.writeHead(204, standardHeaders);
             res.end();
           } catch (err) {
-            res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            console.error(err); // eslint-disable-line no-console
+            res.writeHead(500, standardHeaders);
             res.end(err.message);
           }
         });

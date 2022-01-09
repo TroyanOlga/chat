@@ -9,5 +9,5 @@ initWebsocket(server);
 initTcpServer();
 
 server.listen(3000, () => {
-  console.log('server start at port 3000');
+  console.log('server start at port 3000'); // eslint-disable-line no-console
 });

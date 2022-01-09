@@ -64,11 +64,11 @@ export default function initTcpServer() {
   });
 
   server.on('close', () => {
-    console.log('Server disconnected');
+    console.log('Server disconnected'); // eslint-disable-line no-console
   });
 
   server.on('error', (error) => {
-    console.log(`Error : ${error}`);
+    console.log(`Error : ${error}`); // eslint-disable-line no-console
   });
 
   server.listen(3001);

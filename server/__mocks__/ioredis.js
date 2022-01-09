@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const dbData = {
   rooms: [0],
   'user:1:rooms': [0],

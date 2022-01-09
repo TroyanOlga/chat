@@ -5,7 +5,7 @@ export default function initWebsocket(server) {
   const wss = new WebSocketServer({ server });
   wss.on('connection', (ws) => {
     ws.on('message', (data) => {
-      console.log('received: %s', data);
+      console.log('received: %s', data); // eslint-disable-line no-console
     });
 
     ws.send('Connection established');
