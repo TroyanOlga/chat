@@ -1,6 +1,8 @@
 import Redis from 'ioredis';
 
-const redis = new Redis(); // uses defaults unless given configuration object
+const redis = new Redis({
+  port: process.env.REDIS_PORT,
+});
 export default {
   async getMessages(roomId) {
     return redis.zrevrange(`room:${roomId}`, 0, 30);
