@@ -14,7 +14,7 @@ npm install
 2. ### Add .env files to both server and frontend folders
 Use .env.example as reference
 
-1. ### Start redis (should be installed prior)
+3. ### Start redis (should be installed prior)
 #### mac
 ```
 brew services start redis
