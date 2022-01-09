@@ -2,7 +2,6 @@ import redisService from './redis.service.js';
 import event from './event.service.js';
 
 export default function routing(req, res) {
-  // try {
   switch (true) {
     case req.url === '/chat':
       if (req.method === 'GET') {
@@ -69,6 +68,7 @@ export default function routing(req, res) {
         });
       }
       break;
+    // TODO add proper authentication
     case req.url === '/login':
       if (req.method === 'OPTIONS') {
         const headers = {
@@ -106,13 +106,47 @@ export default function routing(req, res) {
         });
       }
       break;
+    // TODO update when proper authentication in place
+    // and potentially move usernames to temporary reserved list when user is deleted
+    case req.url === '/logout':
+      if (req.method === 'OPTIONS') {
+        const headers = {
+          'Access-Control-Allow-Origin': 'http://localhost:8080',
+          'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
+          'Access-Control-Allow-Headers': '*',
+        };
+        res.writeHead(204, headers);
+        res.end();
+        return;
+      }
+      if (req.method === 'POST') {
+        let temporaryBody = '';
+        req.on('data', (chunk) => {
+          temporaryBody += chunk;
+        });
+
+        req.on('end', async () => {
+          const body = JSON.parse(temporaryBody);
+          if (!body?.user) {
+            res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.write(JSON.stringify({ message: 'User id is missing!' }));
+            res.end();
+            return;
+          }
+          try {
+            const user = await redisService.getUser(body.user);
+            await redisService.markUsernameNotTaken(user);
+            res.writeHead(204, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.end();
+          } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
+            res.end(err.message);
+          }
+        });
+      }
+      break;
     default:
       res.writeHead(404, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ message: 'Route not found' }));
   }
-  // } catch (err) { // TODO add better error handling
-  //   console.log(err);
-  //   res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://localhost:8080' });
-  //   res.end(err.message);
-  // }
 }

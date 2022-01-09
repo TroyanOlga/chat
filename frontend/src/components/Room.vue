@@ -1,5 +1,13 @@
 <template>
   <b-container>
+    <b-button
+      type="button"
+      size="sm"
+      variant="outline-secondary"
+      @click="handleLogout"
+    >
+      Logout
+    </b-button>
     <div v-for="messageData in messages" :key="messageData.dateTime">
       <div class="d-flex align-items-center justify-content-between">
         <small class="fw-bold">{{ messageData.username }}</small>
@@ -68,9 +76,15 @@ export default {
       }
     };
 
+    // TODO remove before moving to prod
     connection.onopen = (event) => {
-      console.log(event);
-      console.log('Successfully connected to the echo websocket server...');
+      console.log(event); // eslint-disable-line no-console
+      console.log('Successfully connected to the echo websocket server...'); // eslint-disable-line no-console
+    };
+
+    // TODO replace with proper vuex solution
+    window.onbeforeunload = async () => {
+      await this.handleLogout();
     };
   },
   methods: {
@@ -91,6 +105,12 @@ export default {
       } catch (err) {
         this.showErrorTime = 5;
       }
+    },
+    async handleLogout() {
+      await this.axios.post('logout', {
+        user: this.user,
+      });
+      this.$router.push({ name: 'Home' });
     },
     countDownChanged: function (dismissCountDown) {
       this.showErrorTime = dismissCountDown;

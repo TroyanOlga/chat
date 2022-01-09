@@ -21,13 +21,20 @@ export default function initTcpServer() {
       if (data.endsWith('\n') || data.endsWith('\r\n')) {
         const clientInput = message.join('').replace('\r\n', '').replace('\n', '');
         if (!currentUser) {
-          const user = await redisService.addUser(clientInput);
-          currentUser = user.userId;
+          let user;
+          try {
+            user = await redisService.addUser(clientInput);
+          } catch (err) {
+            connection.write(`${err.message}\n`);
+            connection.write('Choose another name:\n');
+            return;
+          }
+          currentUser = user;
           // TODO refactor for additional rooms
           const olderRoomMessages = (await redisService.getMessages(+user.rooms[0]))
             .map((string) => JSON.parse(string))
             .reverse();
-          connection.write(`Welcome to general room, ${clientInput}`);
+          connection.write(`Welcome to general room, ${clientInput}\n`);
           olderRoomMessages.forEach((messageData) => {
             connection.write(`${messageData.username} on ${dayjs(messageData.dateTime).format('YYYY-MM-DD HH:mm')}: ${messageData.message}\n`);
           });
@@ -35,13 +42,18 @@ export default function initTcpServer() {
           // TODO refactor for additional rooms
           const defaultRoomId = 0;
           const messageData = {
-            from: currentUser,
+            from: currentUser.userId,
             dateTime: new Date().getTime(),
             message: clientInput,
           };
           await redisService.saveMessage(defaultRoomId, messageData);
           event.emit('newMessage', JSON.stringify(messageData));
         }
+      }
+    });
+    connection.on('end', async () => {
+      if (currentUser) {
+        await redisService.markUsernameNotTaken(currentUser.username);
       }
     });
     event.on('newMessage', ((messageData) => {

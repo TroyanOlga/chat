@@ -7,7 +7,7 @@
       dismissible
       @dismiss-count-down="countDownChanged"
     >
-      Login not successful. Please try later
+      {{ error || 'Login not successful, please try later' }}
     </b-alert>
     <b-form
       @submit.prevent="onSubmit"
@@ -48,6 +48,7 @@ export default {
     return {
       name: null,
       showErrorTime: 0,
+      error: null,
     };
   },
   methods: {
@@ -56,6 +57,7 @@ export default {
         const result = await this.axios.post('/login', { name: this.name });
         this.$router.push({ name: 'Chat', params: { userId: result.data.userId } });
       } catch (err) {
+        this.error = err.response.data;
         this.showErrorTime = 5;
       }
     },

@@ -22,14 +22,28 @@ export default {
   async getAllRoomsForUser(userId) {
     return redis.smembers(`user:${userId}:rooms`);
   },
+  async checkIfUsernameTaken(username) {
+    return (await redis.sismember('usernames', username)) === 1;
+  },
+  async markUsernameTaken(username) {
+    await redis.sadd('usernames', username);
+  },
+  async markUsernameNotTaken(username) {
+    await redis.srem('usernames', username);
+  },
   async addUser(username) {
-    const totalUsers = await redis.get('totalUsers'); // todo existing users + when no users are present in db
+    const isUserNameTaken = await this.checkIfUsernameTaken(username);
+    if (isUserNameTaken) {
+      throw new Error('Username already taken!');
+    }
+    const totalUsers = await redis.get('totalUsers');
     const newTotalUsers = +totalUsers + 1;
     const userId = newTotalUsers;
     const result = await redis.hset(`user:${userId}`, 'username', username);
-    if (result !== 1) { // TODO change when added existing users check
+    if (result !== 1) {
       throw new Error('Error during user addition');
     }
+    await this.markUsernameTaken(username);
     await redis.set('totalUsers', newTotalUsers);
     const rooms = await this.getRooms();
     const defaultRoom = 0;
