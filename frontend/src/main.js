@@ -9,7 +9,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import App from './App.vue';
 import router from './router';
 
-axios.defaults.baseURL = 'http://localhost:3000'; // TODO change to env
+axios.defaults.baseURL = process.env.VUE_APP_BASE_URL;
 Vue.use(BootstrapVue);
 Vue.use(VueAxios, axios);
 Vue.use(Dayjs);

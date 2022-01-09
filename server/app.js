@@ -1,4 +1,5 @@
 import http from 'http';
+import {} from 'dotenv/config';
 import routing from './routing.service.js';
 import initWebsocket from './websocket.service.js';
 import initTcpServer from './tcp.connection.service.js';

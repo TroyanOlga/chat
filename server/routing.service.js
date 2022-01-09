@@ -3,7 +3,7 @@ import event from './event.service.js';
 
 const standardHeaders = {
   'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': 'http://localhost:8080',
+  'Access-Control-Allow-Origin': process.env.FRONTEND_URL,
 };
 
 export default function routing(req, res) {

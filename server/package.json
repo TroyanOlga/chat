@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "dayjs": "^1.10.7",
+    "dotenv": "^10.0.0",
     "ioredis": "^4.28.2",
     "ws": "^8.4.0"
   }

@@ -9,15 +9,17 @@
     >
       Logout
     </b-button>
-    <div v-for="messageData in messages" :key="messageData.dateTime">
-      <div class="d-flex align-items-center justify-content-between">
-        <small class="fw-bold">{{ messageData.username }}</small>
-        <small class="text-muted">{{ $dayjs(messageData.dateTime).fromNow() }}</small>
+    <section class="mb-3">
+      <div v-for="messageData in messages" :key="messageData.dateTime">
+        <div class="d-flex align-items-center justify-content-between">
+          <small class="fw-bold">{{ messageData.username }}</small>
+          <small class="text-muted">{{ $dayjs(messageData.dateTime).fromNow() }}</small>
+        </div>
+        <p class="mb-0 border-bottom text-start">
+          {{ messageData.message }}
+        </p>
       </div>
-      <p class="mb-0 border-bottom text-start">
-        {{ messageData.message }}
-      </p>
-    </div>
+    </section>
     <b-alert
       v-model="showErrorTime"
       variant="danger"
@@ -66,7 +68,7 @@ export default {
   mounted: async function () {
     const messages = (await this.axios.get(`/room/${this.roomId}`)).data;
     this.messages = messages.reverse();
-    const connection = new WebSocket('ws://localhost:3000');
+    const connection = new WebSocket(process.env.VUE_APP_WEBSOCKET_URL);
     connection.onmessage = (event) => {
       try {
         const response = JSON.parse(event.data);
